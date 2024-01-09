@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+
+  # app that writes to stdout
+  container-app:
+    image: alpine
+    volumes:
+      - ./apps:/app
+    command: [/bin/sh, -c, "chmod +x /app/stdout-app.sh && ./app/stdout-app.sh"]
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        tag: container-app
+    depends_on:
+      - fluentd
+
+  # app that writes to a file /app/example-log.log
+  file-app:
+    image: alpine
+    volumes:
+      - ./apps:/app
+    command: [/bin/sh, -c, "chmod +x /app/file-app.sh && ./app/file-app.sh"]
+
+  # app that writes log to http
+  http-app:
+    image: alpine
+    volumes:
+      - ./apps:/app
+    command: [/bin/sh, -c, "apk add --no-cache curl && chmod +x /app/http-app.sh && ./app/http-app.sh"]
+    
+  # collect logs from all the apps
+  fluentd:
+    image: fluentd
+    user: root
+    ports:
+      - 24224:24224
+    volumes:
+      - ./config:/fluentd/etc/    # where our config files are located
+      - ./apps:/fluentd/log/files # fluentd needs to have access to the output file
+      - ./out:/out/               # see the fluentd written files
