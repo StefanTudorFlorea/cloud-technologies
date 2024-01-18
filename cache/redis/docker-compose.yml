@@ -1,9 +1,19 @@
 version: "3"
 
+volumes:
+  persistent-storage:
+    driver: local
+
 services:
   redis:
     image: redis:latest
-    expose: [6379]
+    expose:
+      - 6379
+    volumes:
+        - persistent-storage:/data
+    entrypoint: redis-server --appendonly yes
+    ports:
+      - 6379:6379
 
   app:
     build: app/
