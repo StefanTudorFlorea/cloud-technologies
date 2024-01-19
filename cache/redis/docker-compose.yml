@@ -14,6 +14,3 @@ services:
     entrypoint: redis-server --appendonly yes
     ports:
       - 6379:6379
-
-  app:
-    build: app/

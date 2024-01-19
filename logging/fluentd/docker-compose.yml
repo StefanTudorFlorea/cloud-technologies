@@ -2,6 +2,18 @@ version: "3"
 
 services:
 
+  # collect logs from all the apps below using fluentd
+  fluentd:
+    image: fluentd
+    user: root
+    ports:
+      - 24224:24224
+    volumes:
+      - ./config:/fluentd/etc/    # where our config files are located
+      - ./apps:/fluentd/log/files # fluentd needs to have access to the output file
+      - ./out:/out/               # see the fluentd written files
+
+
   # app that writes to stdout
   container-app:
     image: alpine
@@ -30,13 +42,3 @@ services:
       - ./apps:/app
     command: [/bin/sh, -c, "apk add --no-cache curl && chmod +x /app/http-app.sh && ./app/http-app.sh"]
     
-  # collect logs from all the apps
-  fluentd:
-    image: fluentd
-    user: root
-    ports:
-      - 24224:24224
-    volumes:
-      - ./config:/fluentd/etc/    # where our config files are located
-      - ./apps:/fluentd/log/files # fluentd needs to have access to the output file
-      - ./out:/out/               # see the fluentd written files
